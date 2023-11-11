@@ -1,9 +1,10 @@
 package db
 
 import (
+	"onepixel_backend/src/models"
+
 	"github.com/gofiber/fiber/v2/log"
 	"gorm.io/gorm/logger"
-	"onepixel_backend/src/models"
 
 	"github.com/samber/lo"
 	"gorm.io/driver/postgres"

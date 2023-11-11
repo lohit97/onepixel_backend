@@ -74,6 +74,28 @@ func TestUsersRoute_RegisterUserBodyParsingFail(t *testing.T) {
 	assert.Equal(t, "The request body is not valid", responseBody.Message)
 }
 
+func TestUsersController_CreateBadJSON(t *testing.T) {
+	reqBody := []byte(`{bad json}`)
+
+	req := httptest.NewRequest("POST", "/api/v1/users", bytes.NewBuffer(reqBody))
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	resp := lo.Must(app.Test(req))
+
+	var responseBody dtos.ErrorResponse
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("Error reading response body: %v", err)
+	}
+	if err := json.Unmarshal(body, &responseBody); err != nil {
+		t.Fatalf("Error unmarshalling response body: %v", err)
+	}
+
+	assert.Equal(t, 400, resp.StatusCode)
+	assert.Equal(t, 400, responseBody.Status)
+	assert.Equal(t, "The request body is not valid", responseBody.Message)
+}
+
 func TestUsersRoute_GetUserInfoUnauthorized(t *testing.T) {
 	req := httptest.NewRequest("GET", "/api/v1/users/1", nil)
 	resp := lo.Must(app.Test(req))
@@ -107,4 +129,10 @@ func TestUsersRoute_ShouldNotRegisterUserWhenNoEmail(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	resp := lo.Must(app.Test(req))
 	assert.Equal(t, 422, resp.StatusCode)
+}
+
+func TestUsersRoute_GetAllUsers(t *testing.T) {
+	req := httptest.NewRequest("GET", "/api/v1/users", nil)
+	resp := lo.Must(app.Test(req))
+	assert.Equal(t, 200, resp.StatusCode)
 }
